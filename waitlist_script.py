@@ -7,8 +7,9 @@ import os, time
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-EMAIL = "ghule@synopsys.com"
-PASSWORD = "Ssgssg@123"
+
+EMAIL = os.getenv("CHARGEPOINT_EMAIL")
+PASSWORD = os.getenv("CHARGEPOINT_PASSWORD")
 
 chrome_options = Options()
 # Comment headless to see it working visually
@@ -71,3 +72,4 @@ except Exception as e:
 
 finally:
     driver.quit()
+
