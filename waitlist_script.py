@@ -20,7 +20,7 @@ chrome_options.add_argument("--no-sandbox")
 driver = webdriver.Chrome(options=chrome_options)
 
 try:
-    print("🔐 Logging into ChargePoint...")
+    print("Logging into ChargePoint...")
     driver.get("https://na.chargepoint.com/login")
     driver.save_screenshot("1_initial_page.png")
 
@@ -43,7 +43,7 @@ try:
 
     WebDriverWait(driver, 30).until(
     EC.presence_of_element_located((By.CSS_SELECTOR, ".sc-dlWCHZ.cBOeKh")))
-    print("✅ Login successful")
+    print("Login successful")
 
     driver.get("https://driver.chargepoint.com/waitlist")
     element = WebDriverWait(driver, 15).until(
@@ -55,7 +55,7 @@ try:
     element.click()
     
 
-    print("✅ Join Waitlist successful")
+    print("Join Waitlist successful")
 
     element = WebDriverWait(driver, 15).until(
     EC.presence_of_element_located((By.CSS_SELECTOR, '.sc-ixPHmS gBLpfA')))
@@ -67,9 +67,10 @@ try:
 
 
 except Exception as e:
-    print(f"❌ Script failed: {e}")
+    print(f"Script failed: {e}")
     driver.save_screenshot("error.png")
 
 finally:
     driver.quit()
+
 
