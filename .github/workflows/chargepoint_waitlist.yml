@@ -1,0 +1,36 @@
+name: ChargePoint Waitlist Automation
+
+on:
+  schedule:
+    - cron: '59 15 * * *'  # runs at 8:59 AM PST (15:59 UTC)
+  workflow_dispatch:        # optional manual trigger
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    env:
+      CHARGEPOINT_EMAIL: ${{ secrets.CHARGEPOINT_EMAIL }}
+      CHARGEPOINT_PASSWORD: ${{ secrets.CHARGEPOINT_PASSWORD }}
+      CHARGEPOINT_STATION_NAME: ${{ secrets.CHARGEPOINT_STATION_NAME }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.10
+
+      - name: Install dependencies
+        run: |
+          pip install selenium
+          sudo apt-get update
+          sudo apt-get install -y chromium-browser chromium-chromedriver
+          sudo cp /usr/lib/chromium-browser/chromedriver /usr/bin/chromedriver
+          export CHROME_BIN=/usr/bin/chromium-browser
+          export PATH=$PATH:/usr/bin
+
+      - name: Run waitlist script
+        run: python waitlist_script.py
