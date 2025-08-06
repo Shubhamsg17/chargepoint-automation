@@ -12,7 +12,6 @@ jobs:
     env:
       CHARGEPOINT_EMAIL: ${{ secrets.CHARGEPOINT_EMAIL }}
       CHARGEPOINT_PASSWORD: ${{ secrets.CHARGEPOINT_PASSWORD }}
-      CHARGEPOINT_STATION_NAME: ${{ secrets.CHARGEPOINT_STATION_NAME }}
 
     steps:
       - name: Checkout repository
