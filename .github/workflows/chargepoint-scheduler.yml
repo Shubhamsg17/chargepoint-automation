@@ -3,7 +3,7 @@ name: ChargePoint Waitlist Automation
 
 on:
   schedule:
-    - cron: '50 15 * * *'
+    - cron: '56 15 * * *'
   workflow_dispatch:
 
 jobs:
