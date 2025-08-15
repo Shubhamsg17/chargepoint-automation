@@ -1,10 +1,15 @@
-# Force registration
 name: ChargePoint Waitlist Automation
 
 on:
   schedule:
-    - cron: '26 15 * * *'
+    # Start a little early to absorb GitHub's scheduler jitter.
+    # 15:55 UTC ≈ 8:55 AM in Los Angeles during DST, 7:55 AM during PST.
+    - cron: "55 15 * * *"
   workflow_dispatch:
+
+concurrency:
+  group: chargepoint-waitlist
+  cancel-in-progress: false
 
 jobs:
   run:
@@ -20,14 +25,54 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Python 3.13
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.13'
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install selenium
+          pip install selenium tzdata
+
+      # This step blocks until it is exactly 08:58:00 America/Los_Angeles.
+      # If the job starts late (after 08:58), it exits cleanly to avoid
+      # running at the wrong time.
+      - name: Wait until 08:58 America/Los_Angeles
+        shell: python
+        run: |
+          import datetime, time, sys
+          try:
+              from zoneinfo import ZoneInfo
+          except Exception:
+              # Python <3.9 fallback (not needed here, but kept for safety)
+              print("zoneinfo not available; exiting.")
+              sys.exit(1)
+
+          tz = ZoneInfo("America/Los_Angeles")
+          now = datetime.datetime.now(tz)
+          target = now.replace(hour=8, minute=58, second=0, microsecond=0)
+
+          # If we've already passed today's 08:58, do not run late.
+          if now > target:
+              print(f"Started at {now.isoformat()} but target {target.isoformat()} already passed. Exiting.")
+              sys.exit(0)
+
+          wait = (target - now).total_seconds()
+
+          # Safety cap to avoid extremely long sleeps if time math goes wrong.
+          if wait > 7200:  # 2 hours
+              print(f"Wait {wait:.0f}s is unexpectedly long; exiting.")
+              sys.exit(0)
+
+          print(f"Waiting {int(wait)} seconds until {target.isoformat()} (America/Los_Angeles)")
+          time.sleep(wait)
+          # Tiny guard: align to start of the second.
+          while True:
+              now = datetime.datetime.now(tz)
+              if now.second == 0 or (now - target).total_seconds() >= 0:
+                  break
+              time.sleep(0.1)
+          print(f"It's exactly {datetime.datetime.now(tz).isoformat()} — proceeding.")
 
       - name: Run waitlist script
         run: python waitlist_script.py
